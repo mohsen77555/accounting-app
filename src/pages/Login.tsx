@@ -11,9 +11,20 @@ export default function Login() {
     e.preventDefault()
     setError(null)
     setLoading(true)
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
-    setLoading(false)
-    if (error) setError(error.message)
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password })
+      if (error) {
+        console.error('Supabase auth error:', error)
+        const detail = error.message && error.message !== '{}' ? error.message : JSON.stringify(error, Object.getOwnPropertyNames(error))
+        setError(`${error.name ?? 'Error'} (${error.status ?? '?'}): ${detail}`)
+      }
+    } catch (e) {
+      console.error('signInWithPassword threw:', e)
+      const detail = e instanceof Error ? `${e.name}: ${e.message}` : JSON.stringify(e)
+      setError(`استثناء غير متوقع: ${detail}`)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -33,6 +44,10 @@ export default function Login() {
         <button type="submit" disabled={loading}>
           {loading ? 'جارٍ الدخول...' : 'دخول'}
         </button>
+        <p className="muted" style={{ wordBreak: 'break-all' }}>
+          URL: {import.meta.env.VITE_SUPABASE_URL ? 'موجود ✅' : 'مفقود ❌'} | Key:{' '}
+          {import.meta.env.VITE_SUPABASE_ANON_KEY ? `موجود (${(import.meta.env.VITE_SUPABASE_ANON_KEY as string).length} حرف) ✅` : 'مفقود ❌'}
+        </p>
       </form>
     </div>
   )
