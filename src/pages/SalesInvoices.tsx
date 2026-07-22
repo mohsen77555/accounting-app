@@ -7,10 +7,18 @@ interface LineDraft {
   item_id: string
   qty: string
   rate: string
+  discount_percent: string
 }
 
 function emptyLine(): LineDraft {
-  return { item_id: '', qty: '', rate: '' }
+  return { item_id: '', qty: '', rate: '', discount_percent: '' }
+}
+
+function lineAmount(l: LineDraft) {
+  const qty = parseFloat(l.qty) || 0
+  const rate = parseFloat(l.rate) || 0
+  const discount = parseFloat(l.discount_percent) || 0
+  return qty * rate * (1 - discount / 100)
 }
 
 export default function SalesInvoices() {
@@ -55,7 +63,7 @@ export default function SalesInvoices() {
     setLines((prev) => prev.filter((_, i) => i !== idx))
   }
 
-  const total = lines.reduce((sum, l) => sum + (parseFloat(l.qty) || 0) * (parseFloat(l.rate) || 0), 0)
+  const total = lines.reduce((sum, l) => sum + lineAmount(l), 0)
 
   async function handleCreateDraft() {
     setError(null)
@@ -85,6 +93,7 @@ export default function SalesInvoices() {
       item_id: l.item_id,
       qty: parseFloat(l.qty),
       rate: parseFloat(l.rate) || 0,
+      discount_percent: parseFloat(l.discount_percent) || 0,
     }))
     const { error: linesErr } = await supabase.from('accounting_sales_invoice_items').insert(rows)
     if (linesErr) {
@@ -214,6 +223,7 @@ export default function SalesInvoices() {
                 <th>الصنف</th>
                 <th>الكمية</th>
                 <th>السعر</th>
+                <th>الخصم %</th>
                 <th>الإجمالي</th>
                 <th></th>
               </tr>
@@ -237,7 +247,17 @@ export default function SalesInvoices() {
                   <td>
                     <input type="number" step="0.01" value={line.rate} onChange={(e) => updateLine(idx, { rate: e.target.value })} />
                   </td>
-                  <td>{((parseFloat(line.qty) || 0) * (parseFloat(line.rate) || 0)).toFixed(2)}</td>
+                  <td>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      max="100"
+                      value={line.discount_percent}
+                      onChange={(e) => updateLine(idx, { discount_percent: e.target.value })}
+                    />
+                  </td>
+                  <td>{lineAmount(line).toFixed(2)}</td>
                   <td>
                     <button type="button" className="link-btn" onClick={() => removeLine(idx)}>
                       حذف
@@ -248,7 +268,7 @@ export default function SalesInvoices() {
             </tbody>
             <tfoot>
               <tr>
-                <td colSpan={3}>الإجمالي</td>
+                <td colSpan={4}>الإجمالي</td>
                 <td colSpan={2}>{total.toFixed(2)}</td>
               </tr>
             </tfoot>
