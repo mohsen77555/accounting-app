@@ -1,4 +1,4 @@
-import { HashRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import type { ReactNode } from 'react'
 import { AuthProvider, useAuth } from './AuthContext'
 import Login from './pages/Login'
@@ -69,10 +69,10 @@ function AppRoutes() {
 
 export default function App() {
   return (
-    <HashRouter>
+    <BrowserRouter>
       <AuthProvider>
         <AppRoutes />
       </AuthProvider>
-    </HashRouter>
+    </BrowserRouter>
   )
 }
