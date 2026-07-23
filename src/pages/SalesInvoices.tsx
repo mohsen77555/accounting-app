@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient'
-import type { Customer, Item, SalesInvoice } from '../types'
+import type { Account, Customer, Item, SalesInvoice } from '../types'
 import { useAuth } from '../AuthContext'
 
 interface LineDraft {
@@ -28,6 +28,7 @@ export default function SalesInvoices() {
   const [invoices, setInvoices] = useState<SalesInvoice[]>([])
   const [customers, setCustomers] = useState<Customer[]>([])
   const [items, setItems] = useState<Item[]>([])
+  const [accounts, setAccounts] = useState<Account[]>([])
   const [error, setError] = useState<string | null>(null)
   const [busyId, setBusyId] = useState<string | null>(null)
 
@@ -35,18 +36,22 @@ export default function SalesInvoices() {
   const [postingDate, setPostingDate] = useState(() => new Date().toISOString().slice(0, 10))
   const [dueDate, setDueDate] = useState('')
   const [remarks, setRemarks] = useState('')
+  const [taxPercent, setTaxPercent] = useState('')
+  const [taxAccountId, setTaxAccountId] = useState('')
   const [lines, setLines] = useState<LineDraft[]>([emptyLine()])
 
   async function load() {
-    const [{ data: inv, error: invErr }, { data: cust }, { data: it }] = await Promise.all([
+    const [{ data: inv, error: invErr }, { data: cust }, { data: it }, { data: acc }] = await Promise.all([
       supabase.from('accounting_sales_invoices').select('*').order('created_at', { ascending: false }),
       supabase.from('accounting_customers').select('*').order('code'),
       supabase.from('accounting_items').select('*').order('code'),
+      supabase.from('accounts').select('*').eq('is_group', false).order('code'),
     ])
     if (invErr) setError(invErr.message)
     else setInvoices(inv as SalesInvoice[])
     setCustomers((cust as Customer[]) ?? [])
     setItems((it as Item[]) ?? [])
+    setAccounts((acc as Account[]) ?? [])
   }
 
   useEffect(() => {
@@ -63,7 +68,9 @@ export default function SalesInvoices() {
     setLines((prev) => prev.filter((_, i) => i !== idx))
   }
 
-  const total = lines.reduce((sum, l) => sum + lineAmount(l), 0)
+  const subtotal = lines.reduce((sum, l) => sum + lineAmount(l), 0)
+  const taxAmount = subtotal * ((parseFloat(taxPercent) || 0) / 100)
+  const total = subtotal + taxAmount
 
   async function handleCreateDraft() {
     setError(null)
@@ -76,10 +83,21 @@ export default function SalesInvoices() {
       setError('أضف سطرًا واحدًا على الأقل')
       return
     }
+    if (parseFloat(taxPercent) > 0 && !taxAccountId) {
+      setError('اختر حساب الضريبة لأن نسبة الضريبة أكبر من صفر')
+      return
+    }
 
     const { data: inv, error: invErr } = await supabase
       .from('accounting_sales_invoices')
-      .insert({ customer_id: customerId, posting_date: postingDate, due_date: dueDate || null, remarks })
+      .insert({
+        customer_id: customerId,
+        posting_date: postingDate,
+        due_date: dueDate || null,
+        remarks,
+        tax_percent: parseFloat(taxPercent) || 0,
+        tax_account_id: taxAccountId || null,
+      })
       .select()
       .single()
     if (invErr || !inv) {
@@ -103,6 +121,8 @@ export default function SalesInvoices() {
 
     setRemarks('')
     setDueDate('')
+    setTaxPercent('')
+    setTaxAccountId('')
     setLines([emptyLine()])
     load()
   }
@@ -150,6 +170,7 @@ export default function SalesInvoices() {
             <th>العميل</th>
             <th>التاريخ</th>
             <th>الحالة</th>
+            <th>الضريبة</th>
             <th>الإجمالي</th>
             <th>المتبقي</th>
             <th>إجراءات</th>
@@ -164,6 +185,7 @@ export default function SalesInvoices() {
               <td>
                 <span className={`status-pill status-${inv.status.toLowerCase()}`}>{inv.status}</span>
               </td>
+              <td>{inv.tax_amount}</td>
               <td>{inv.total_amount}</td>
               <td>{inv.outstanding_amount}</td>
               <td>
@@ -214,6 +236,23 @@ export default function SalesInvoices() {
             <label className="grow">
               ملاحظات
               <input value={remarks} onChange={(e) => setRemarks(e.target.value)} />
+            </label>
+          </div>
+          <div className="form-row">
+            <label>
+              نسبة الضريبة %
+              <input type="number" step="0.01" min="0" max="100" value={taxPercent} onChange={(e) => setTaxPercent(e.target.value)} />
+            </label>
+            <label className="grow">
+              حساب الضريبة
+              <select value={taxAccountId} onChange={(e) => setTaxAccountId(e.target.value)}>
+                <option value="">بدون ضريبة</option>
+                {accounts.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.code} - {a.name}
+                  </option>
+                ))}
+              </select>
             </label>
           </div>
 
@@ -268,7 +307,15 @@ export default function SalesInvoices() {
             </tbody>
             <tfoot>
               <tr>
-                <td colSpan={4}>الإجمالي</td>
+                <td colSpan={4}>المجموع الفرعي</td>
+                <td colSpan={2}>{subtotal.toFixed(2)}</td>
+              </tr>
+              <tr>
+                <td colSpan={4}>الضريبة ({taxPercent || 0}%)</td>
+                <td colSpan={2}>{taxAmount.toFixed(2)}</td>
+              </tr>
+              <tr>
+                <td colSpan={4}>الإجمالي شامل الضريبة</td>
                 <td colSpan={2}>{total.toFixed(2)}</td>
               </tr>
             </tfoot>

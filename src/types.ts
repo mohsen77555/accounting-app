@@ -112,6 +112,9 @@ export interface SalesInvoice {
   status: JournalEntryStatus
   total_amount: number
   outstanding_amount: number
+  tax_percent: number
+  tax_amount: number
+  tax_account_id: string | null
   remarks: string | null
 }
 
@@ -124,6 +127,9 @@ export interface PurchaseInvoice {
   status: JournalEntryStatus
   total_amount: number
   outstanding_amount: number
+  tax_percent: number
+  tax_amount: number
+  tax_account_id: string | null
   remarks: string | null
 }
 
