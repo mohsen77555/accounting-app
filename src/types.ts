@@ -177,3 +177,23 @@ export interface FiscalYear {
   end_date: string
   is_closed: boolean
 }
+
+export interface BankStatementLine {
+  id: string
+  bank_account_id: string
+  statement_date: string
+  description: string | null
+  reference: string | null
+  amount: number
+  is_matched: boolean
+  matched_gl_entry_id: string | null
+}
+
+export interface UnmatchedGlEntry {
+  id: string
+  posting_date: string
+  debit: number
+  credit: number
+  remarks: string | null
+  entry_number: string
+}

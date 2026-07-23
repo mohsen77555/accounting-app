@@ -27,6 +27,7 @@ export default function Layout() {
           <NavLink to="/reports/ar-aging">أعمار ديون العملاء</NavLink>
           <NavLink to="/reports/ap-aging">أعمار ديون الموردين</NavLink>
           <NavLink to="/reports/stock-valuation">تقييم المخزون</NavLink>
+          <NavLink to="/bank-reconciliation">التسوية البنكية</NavLink>
           <NavLink to="/fiscal-year-close">إقفال السنة المالية</NavLink>
           <NavLink to="/users">إدارة المستخدمين</NavLink>
         </nav>

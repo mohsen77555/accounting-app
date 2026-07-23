@@ -24,6 +24,7 @@ import FiscalYearClose from './pages/FiscalYearClose'
 import UserManagement from './pages/UserManagement'
 import PrintSalesInvoice from './pages/PrintSalesInvoice'
 import PrintPurchaseInvoice from './pages/PrintPurchaseInvoice'
+import BankReconciliation from './pages/BankReconciliation'
 
 function RequireAuth({ children }: { children: ReactNode }) {
   const { session, loading } = useAuth()
@@ -62,6 +63,7 @@ function AppRoutes() {
         <Route path="reports/ar-aging" element={<ARAging />} />
         <Route path="reports/ap-aging" element={<APAging />} />
         <Route path="reports/stock-valuation" element={<StockValuation />} />
+        <Route path="bank-reconciliation" element={<BankReconciliation />} />
         <Route path="fiscal-year-close" element={<FiscalYearClose />} />
         <Route path="users" element={<UserManagement />} />
       </Route>
