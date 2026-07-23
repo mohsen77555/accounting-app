@@ -286,3 +286,86 @@ label.grow {
   flex: 1;
   min-width: 280px;
 }
+
+.print-page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 24px;
+}
+.print-toolbar {
+  margin-bottom: 16px;
+}
+.print-invoice {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 32px;
+}
+.print-invoice h1 {
+  text-align: center;
+  margin-bottom: 24px;
+}
+.print-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+.print-party {
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+.print-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 16px;
+}
+.print-table th,
+.print-table td {
+  border: 1px solid var(--border);
+  padding: 8px 10px;
+  text-align: start;
+  font-size: 14px;
+}
+.print-totals {
+  margin-inline-start: auto;
+  width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+}
+.print-totals > div {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+}
+.print-total-grand {
+  font-weight: 700;
+  border-top: 1px solid var(--border);
+  padding-top: 8px !important;
+}
+.print-remarks {
+  margin-top: 20px;
+  font-size: 14px;
+}
+
+@media print {
+  .sidebar,
+  .no-print {
+    display: none !important;
+  }
+  .print-page {
+    padding: 0;
+    max-width: 100%;
+  }
+  .print-invoice {
+    border: none;
+    padding: 0;
+  }
+  body {
+    background: white;
+    color: black;
+  }
+}

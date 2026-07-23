@@ -22,6 +22,8 @@ import APAging from './pages/APAging'
 import StockValuation from './pages/StockValuation'
 import FiscalYearClose from './pages/FiscalYearClose'
 import UserManagement from './pages/UserManagement'
+import PrintSalesInvoice from './pages/PrintSalesInvoice'
+import PrintPurchaseInvoice from './pages/PrintPurchaseInvoice'
 
 function RequireAuth({ children }: { children: ReactNode }) {
   const { session, loading } = useAuth()
@@ -63,6 +65,22 @@ function AppRoutes() {
         <Route path="fiscal-year-close" element={<FiscalYearClose />} />
         <Route path="users" element={<UserManagement />} />
       </Route>
+      <Route
+        path="print/sales-invoice/:id"
+        element={
+          <RequireAuth>
+            <PrintSalesInvoice />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="print/purchase-invoice/:id"
+        element={
+          <RequireAuth>
+            <PrintPurchaseInvoice />
+          </RequireAuth>
+        }
+      />
     </Routes>
   )
 }

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import type { Account, Item, PurchaseInvoice, Supplier } from '../types'
 import { useAuth } from '../AuthContext'
@@ -196,14 +197,17 @@ export default function PurchaseInvoices() {
                     </button>{' '}
                     <button disabled={busyId === inv.id} onClick={() => handleDeleteDraft(inv.id)}>
                       حذف
-                    </button>
+                    </button>{' '}
                   </>
                 )}
                 {canWrite && inv.status === 'Submitted' && (
                   <button disabled={busyId === inv.id} onClick={() => handleCancelInvoice(inv.id)}>
                     إلغاء
                   </button>
-                )}
+                )}{' '}
+                <Link to={`/print/purchase-invoice/${inv.id}`} target="_blank" rel="noopener noreferrer">
+                  طباعة
+                </Link>
               </td>
             </tr>
           ))}
